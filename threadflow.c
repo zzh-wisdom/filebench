@@ -107,7 +107,11 @@ threadflow_init(procflow_t *procflow)
 	threadflow_t *threadflow = procflow->pf_threads;
 	int ret = 0;
 
+	printf("threadflow_init0\n");
+
 	(void) ipc_mutex_lock(&filebench_shm->shm_threadflow_lock);
+
+	printf("threadflow_init1\n");
 
 	while (threadflow) {
 		threadflow_t *newthread;
@@ -115,6 +119,8 @@ threadflow_init(procflow_t *procflow)
 		int i;
 
 		instances = avd_get_int(threadflow->tf_instances);
+		printf("threadflow_init2 instances: %d\n", instances);
+
 		filebench_log(LOG_VERBOSE,
 		    "Starting %d %s threads",
 		    instances, threadflow->tf_name);
@@ -124,8 +130,12 @@ threadflow_init(procflow_t *procflow)
 			newthread =
 			    threadflow_define_common(procflow,
 			    threadflow->tf_name, threadflow, i + 1);
-			if (newthread == NULL)
+			if (newthread == NULL) {
+				printf("threadflow_define_common fail.\n");
 				return (-1);
+			}
+
+			printf("new threadflow_createthread\n");
 			ret |= threadflow_createthread(newthread);
 		}
 
@@ -136,6 +146,7 @@ threadflow_init(procflow_t *procflow)
 		if (newthread == NULL)
 			return (-1);
 
+		printf("threadflow_init3\n");
 		/* Create each thread */
 		ret |= threadflow_createthread(newthread);
 
@@ -148,7 +159,7 @@ threadflow_init(procflow_t *procflow)
 
 	/*
 	 * All threadflows for this process were defined.
-	 * Inform process creator thread about that. 
+	 * Inform process creator thread about that.
 	 * When all thread monitors set this flag (in their
 	 * corresponding procflow structures), the process creator
 	 * thread will set shm_procflows_defined_flag, which
@@ -359,10 +370,13 @@ threadflow_define_common(procflow_t *procflow, char *name,
 	if (name == NULL)
 		return (NULL);
 
+	printf("new threadflow_define_common 0\n");
 	threadflow = (threadflow_t *)ipc_malloc(FILEBENCH_THREADFLOW);
 
 	if (threadflow == NULL)
 		return (NULL);
+
+	printf("new threadflow_define_common 1\n");
 
 	if (inherit)
 		(void) memcpy(threadflow, inherit, sizeof (threadflow_t));
@@ -377,6 +391,8 @@ threadflow_define_common(procflow_t *procflow, char *name,
 	(void) pthread_mutex_init(&threadflow->tf_lock,
 	    ipc_mutexattr(IPC_MUTEX_NORMAL));
 
+	printf("new threadflow_define_common 2\n");
+
 	filebench_log(LOG_DEBUG_IMPL, "Defining thread %s-%d",
 	    name, instance);
 
@@ -388,6 +404,8 @@ threadflow_define_common(procflow_t *procflow, char *name,
 		threadflow->tf_next = *threadlistp;
 		*threadlistp = threadflow;
 	}
+
+	printf("new threadflow_define_common 3\n");
 
 	return threadflow;
 }

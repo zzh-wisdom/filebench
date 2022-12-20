@@ -102,8 +102,10 @@ procflow_createproc(procflow_t *procflow)
 	if (pid == 0) {
 #ifdef USE_SYSTEM
 		char syscmd[1024];
+		printf("USE_SYSTEM\n");
 #endif
-
+		printf("pid\n");
+		// fileset_createsets();
 		(void) sigignore(SIGINT);
 		filebench_log(LOG_DEBUG_SCRIPT,
 		    "Starting %s-%d", procflow->pf_name,
@@ -124,6 +126,9 @@ procflow_createproc(procflow_t *procflow)
 		}
 
 #else
+		// setenv("LD_PRELOAD", "./libnova_hook.so", 0);
+		// printf("LD_PRELOAD: %s\n", getenv("LD_PRELOAD"));
+		printf("execlp execname: %s, procname: %s\n", execname, procname);
 		if (execlp(execname, procname, "-a", procname, "-i",
 		    instance, "-s", shmaddr, "-m", shmpath, NULL) < 0) {
 			filebench_log(LOG_ERROR,
@@ -265,7 +270,7 @@ procflow_exec(char *name, int instance)
 	struct rlimit rlp;
 #endif
 	int ret;
-
+	printf("procflow_exec1\n");
 	if ((procflow = procflow_find(name, instance)) == NULL) {
 		filebench_log(LOG_FATAL,
 		    "procflow_exec could not find %s-%d",
@@ -297,6 +302,7 @@ procflow_exec(char *name, int instance)
 	(void) getrlimit(RLIMIT_NOFILE, &rlp);
 	filebench_log(LOG_DEBUG_SCRIPT, "%d file descriptors", rlp.rlim_cur);
 #endif
+	printf("procflow_exec2\n");
 
 	if ((ret = threadflow_init(procflow)) != FILEBENCH_OK) {
 		if (ret < 0) {
@@ -313,6 +319,8 @@ procflow_exec(char *name, int instance)
 	filebench_shm->shm_procs_running --;
 	(void) ipc_mutex_unlock(&filebench_shm->shm_procs_running_lock);
 	procflow->pf_running = 0;
+
+	printf("procflow_exec3\n");
 
 	return (ret);
 }
@@ -344,6 +352,7 @@ procflow_createnwait(void *unused)
 		/* wait for any child process to exit */
 #ifdef HAVE_WAITID
 		siginfo_t status;
+		printf("waitid(P_ALL, 0, &status, WEXITED)\n");
 		if (waitid(P_ALL, 0, &status, WEXITED) != 0)
 #else /* HAVE_WAITID */
 		int status;
@@ -469,7 +478,7 @@ procflow_init(void)
 
 	(void) signal(SIGUSR1, procflow_cancel);
 
-	/* 
+	/*
 	 * Wait for the process creator thread to define
 	 * all procflows (and threadflows in turn).
 	 */

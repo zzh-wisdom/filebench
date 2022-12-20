@@ -402,11 +402,13 @@ ipc_attach(void *shmaddr, char *shmpath)
 {
 	int shmfd;
 
+	printf("ipc_attach1\n");
 	if ((shmfd = open(shmpath, O_RDWR)) < 0) {
 		filebench_log(LOG_FATAL, "Could not open shared memory "
 			      "file %s: %s", shmpath, strerror(errno));
 		return (-1);
 	}
+	printf("ipc_attach2\n");
 
 	if ((filebench_shm = (filebench_shm_t *)mmap(shmaddr,
 	    sizeof (filebench_shm_t), PROT_READ | PROT_WRITE,
@@ -415,6 +417,7 @@ ipc_attach(void *shmaddr, char *shmpath)
 		"memory file: %s", strerror(errno));
 		return (-1);
 	}
+	printf("ipc_attach3\n");
 
 	if (filebench_shm != shmaddr) {
 		filebench_log(LOG_FATAL, "Could not mmap the shared "
@@ -433,7 +436,7 @@ static int
 preallocated_entries(int obj_type)
 {
 	int entries;
-	
+
 	switch(obj_type) {
 	case FILEBENCH_FILESET:
 		entries = sizeof(filebench_shm->shm_fileset)

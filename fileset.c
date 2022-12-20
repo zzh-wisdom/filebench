@@ -296,7 +296,7 @@ fileset_alloc_file(filesetentry_t *entry)
 
 	/* see if fileset is readonly */
 	fs_readonly = avd_get_bool(fileset->fs_readonly) == TRUE;
-	
+
 	/* see if reusing and this file exists */
 	trust_tree = avd_get_bool(fileset->fs_trust_tree);
 	if ((entry->fse_flags & FSE_REUSING) && (trust_tree ||
@@ -479,10 +479,10 @@ fileset_openfile(fb_fdesc_t *fdesc, fileset_t *fileset,
 	/* Disable read ahead with the help of fadvise, if asked for */
 	if (attrs & FLOW_ATTR_FADV_RANDOM) {
 #ifdef HAVE_FADVISE
-		if (posix_fadvise(fdesc->fd_num, 0, 0, POSIX_FADV_RANDOM) 
+		if (posix_fadvise(fdesc->fd_num, 0, 0, POSIX_FADV_RANDOM)
 			!= FILEBENCH_OK) {
 			filebench_log(LOG_ERROR,
-				"Failed to disable read ahead for file %s, with status %s", 
+				"Failed to disable read ahead for file %s, with status %s",
 			    	path, strerror(errno));
 			fileset_unbusy(entry, FALSE, FALSE, 0);
 			return (FILEBENCH_ERROR);
@@ -1759,7 +1759,7 @@ fileset_createsets()
 	int ret = 0;
 
 	if (filecreate_done) {
-		/* XXX: what if user defines a fileset after create? 
+		/* XXX: what if user defines a fileset after create?
  		* IMHO, we should have filecreate_done flag per fileset */
 		filebench_log(LOG_INFO,
 		    "Attempting to create fileset more than once, ignoring");

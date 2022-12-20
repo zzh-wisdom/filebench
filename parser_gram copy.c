@@ -128,7 +128,7 @@ static void parser_enable_lathist(cmd_t *cmd);
 %token FSC_SYSTEM FSC_EVENTGEN FSC_ECHO FSC_RUN FSC_PSRUN FSC_VERSION FSC_ENABLE
 %token FSC_DOMULTISYNC
 
-%token FSV_STRING FSV_VAL_POSINT FSV_VAL_NEGINT FSV_VAL_BOOLEAN FSV_VARIABLE
+%token FSV_STRING FSV_VAL_POSINT FSV_VAL_NEGINT FSV_VAL_BOOLEAN FSV_VARIABLE 
 %token FSV_WHITESTRING FSV_RANDUNI FSV_RANDTAB FSV_URAND FSV_RAND48
 
 %token FSE_FILE FSE_FILES FSE_FILESET FSE_PROC FSE_THREAD FSE_FLOWOP FSE_CVAR
@@ -757,7 +757,7 @@ fileset_attr_op: attrs_define_fileset FSK_ASSIGN attr_value
 	$$ = $3;
 	$$->attr_name = $1;
 }
-| attrs_define_fileset
+| attrs_define_fileset 
 {
 	$$ = alloc_attr();
 	if (!$$)
@@ -956,7 +956,7 @@ fo_attr_op: attrs_flowop FSK_ASSIGN attr_value
 	$$ = $3;
 	$$->attr_name = $1;
 }
-| attrs_flowop
+| attrs_flowop 
 {
 	if (($$ = alloc_attr()) == NULL)
 		YYERROR;
@@ -988,7 +988,7 @@ ev_attr_op: attrs_eventgen FSK_ASSIGN attr_value
 	$$ = $3;
 	$$->attr_name = $1;
 }
-| attrs_eventgen
+| attrs_eventgen 
 {
 	if (($$ = alloc_attr()) == NULL)
 		YYERROR;
@@ -1439,16 +1439,9 @@ parse_options(int argc, char *argv[], struct fbparams *fbparams)
 	return mode;
 }
 
-#include <dlfcn.h>
-#include <assert.h>
-
-void *lib_hook_handle = NULL;
-
 static void
 worker_mode(struct fbparams *fbparams)
 {
-	// return;
-	printf("worker_mode0\n");
 	int ret;
 
 	ret = ipc_attach(fbparams->shmaddr, fbparams->shmpath);
@@ -1458,38 +1451,17 @@ worker_mode(struct fbparams *fbparams)
 		exit(1);
 	}
 
-	printf("worker_mode1\n");
-
-	printf("dlopen ./libfinefs_hook.so\n");
-    lib_hook_handle = dlopen("./libnova_hook.so", RTLD_NOW);
-	assert(lib_hook_handle);
-
 	/* get correct function pointer for each working process */
 	flowop_init(0);
-
-	printf("worker_mode2\n");
 
 	/* load custom variable libraries and revalidate handles */
 	ret = init_cvar_libraries();
 	if (ret)
 		exit(1);
 
-	printf("worker_mode3\n");
-
 	ret = revalidate_cvar_handles();
 	if (ret)
 		exit(1);
-
-	printf("worker_mode4\n");
-	// yyin = fopen(fbparams->fscriptname, "r");
-	// if (!yyin) {
-	// 	filebench_log(LOG_FATAL,
-	// 		"Cannot open file %s!", fbparams->fscriptname);
-	//	exit(1);
-	// }
-
-	// printf("csvsfv\n");
-	// yyparse();
 
 	/* execute corresponding procflow */
 	ret = procflow_exec(fbparams->procname, fbparams->instance);
@@ -1498,7 +1470,6 @@ worker_mode(struct fbparams *fbparams)
 		    fbparams->procname);
 		exit(1);
 	}
-	printf("worker_mode5\n");
 
 	exit(0);
 }
@@ -1663,22 +1634,14 @@ init_common()
  * run. It initializes the various filebench components and either executes the
  * supplied workload file, or enters interactive mode.
  */
-
-static int global_mode = 0;
-
 int
 main(int argc, char *argv[])
 {
-	//printf("dlopen ./libfinefs_hook.so\n");
-    // lib_hook_handle = dlopen("./libnova_hook.so", RTLD_NOW);
-	// assert(lib_hook_handle);
-
 	struct fbparams fbparams;
 	int mode;
 
 	/* parse_options() exits if detects wrong usage */
 	mode = parse_options(argc, argv, &fbparams);
-	global_mode = mode;
 
 	if (mode == FB_MODE_HELP)
 		usage_exit(0, NULL);
@@ -1968,7 +1931,7 @@ parser_thread_define(cmd_t *cmd, procflow_t *procflow)
 		template.tf_memsize = attr->attr_avd;
 	else /* XXX: really, memsize zero is default?.. */
 		template.tf_memsize = avd_int_alloc(0);
-
+	
 	attr = get_attr(cmd, FSA_IOPRIO);
 	if (attr)
 		template.tf_ioprio = attr->attr_avd;
@@ -2509,7 +2472,7 @@ parser_fileset_create(cmd_t *cmd)
 {
 	int ret;
 
-	ret = fileset_createsets();
+	ret = fileset_createsets(); 
 	if (ret) {
 		filebench_log(LOG_ERROR, "Failed to create filesets");
 		filebench_shutdown(1);
@@ -2583,11 +2546,7 @@ parser_run(cmd_t *cmd)
 
 	runtime = cmd->cmd_qty;
 
-	// printf("parser_run\n");
-
 	parser_fileset_create(cmd);
-
-	// if(global_mode != FB_MODE_MASTER) return;
 	proc_create();
 
 	/* check for startup errors */
