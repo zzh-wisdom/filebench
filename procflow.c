@@ -81,7 +81,7 @@ procflow_createproc(procflow_t *procflow)
 	    procflow->pf_name);
 
 	procflow->pf_running = 0;
-
+	return -1;
 #ifdef HAVE_FORK1
 	if ((pid = fork1()) < 0) {
 		filebench_log(LOG_ERROR,

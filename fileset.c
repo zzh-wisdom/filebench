@@ -1755,6 +1755,7 @@ fileset_checkraw(fileset_t *fileset)
 int
 fileset_createsets()
 {
+	// return 0;
 	fileset_t *list;
 	int ret = 0;
 
